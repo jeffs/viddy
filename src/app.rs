@@ -127,6 +127,7 @@ impl<S: Store> App<S> {
             diff_mode,
             cli.is_bell,
             cli.is_no_title,
+            cli.is_no_status,
             read_only,
             timemachine_mode,
         );
