@@ -58,8 +58,9 @@ impl SQLiteStore {
 
 impl Store for SQLiteStore {
     fn add_record(&mut self, record: Record) -> Result<()> {
-        match self.conn.lock() { Ok(conn) => {
-            conn.execute(
+        match self.conn.lock() {
+            Ok(conn) => {
+                conn.execute(
                 "INSERT INTO record (
                 id, start_time, stdout, stderr, end_time, exit_code, diff_add, diff_delete, previous_id
                 ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
@@ -75,65 +76,18 @@ impl Store for SQLiteStore {
                     record.previous_id,
                 ),
             )?;
-            Ok(())
-        } _ => {
-            color_eyre::eyre::bail!("Failed to get connection")
-        }}
+                Ok(())
+            }
+            _ => {
+                color_eyre::eyre::bail!("Failed to get connection")
+            }
+        }
     }
 
     fn get_record(&self, id: ExecutionId) -> Result<Option<Record>> {
-        match self.conn.lock() { Ok(conn) => {
-            let r = conn.query_row("SELECT * FROM record WHERE id = ?1", [id], |row| {
-                let start_time = row.get::<_, DateTime<Utc>>(1)?;
-                let end_time = row.get::<_, DateTime<Utc>>(4)?;
-                let diff_add: Option<u32> = row.get(6)?;
-                let diff_delete: Option<u32> = row.get(7)?;
-                let diff = diff_add.zip(diff_delete);
-                Ok(Record {
-                    id: row.get(0)?,
-                    start_time: start_time.with_timezone(&Local),
-                    stdout: row.get(2)?,
-                    stderr: row.get(3)?,
-                    end_time: end_time.with_timezone(&Local),
-                    exit_code: row.get(5)?,
-                    diff,
-                    previous_id: row.get(8)?,
-                })
-            });
-
-            match r {
-                Ok(record) => Ok(Some(record)),
-                Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
-                Err(e) => Err(e.into()),
-            }
-        } _ => {
-            color_eyre::eyre::bail!("Failed to get connection")
-        }}
-    }
-
-    fn get_latest_id(&self) -> Result<Option<ExecutionId>> {
-        match self.conn.lock() { Ok(conn) => {
-            let r = conn.query_row(
-                "SELECT id FROM record ORDER BY id DESC LIMIT 1",
-                [],
-                |row| row.get(0),
-            );
-
-            match r {
-                Ok(id) => Ok(Some(id)),
-                Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
-                Err(e) => Err(e.into()),
-            }
-        } _ => {
-            color_eyre::eyre::bail!("Failed to get connection")
-        }}
-    }
-
-    fn get_records(&self) -> Result<Vec<Record>> {
-        match self.conn.lock() { Ok(conn) => {
-            let mut stmt = conn.prepare("SELECT * FROM record")?;
-            let records = stmt
-                .query_map([], |row| {
+        match self.conn.lock() {
+            Ok(conn) => {
+                let r = conn.query_row("SELECT * FROM record WHERE id = ?1", [id], |row| {
                     let start_time = row.get::<_, DateTime<Utc>>(1)?;
                     let end_time = row.get::<_, DateTime<Utc>>(4)?;
                     let diff_add: Option<u32> = row.get(6)?;
@@ -149,46 +103,110 @@ impl Store for SQLiteStore {
                         diff,
                         previous_id: row.get(8)?,
                     })
-                })?
-                .collect::<rusqlite::Result<Vec<Record>>>()?;
-            Ok(records)
-        } _ => {
-            color_eyre::eyre::bail!("Failed to get connection")
-        }}
+                });
+
+                match r {
+                    Ok(record) => Ok(Some(record)),
+                    Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+                    Err(e) => Err(e.into()),
+                }
+            }
+            _ => {
+                color_eyre::eyre::bail!("Failed to get connection")
+            }
+        }
+    }
+
+    fn get_latest_id(&self) -> Result<Option<ExecutionId>> {
+        match self.conn.lock() {
+            Ok(conn) => {
+                let r = conn.query_row(
+                    "SELECT id FROM record ORDER BY id DESC LIMIT 1",
+                    [],
+                    |row| row.get(0),
+                );
+
+                match r {
+                    Ok(id) => Ok(Some(id)),
+                    Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+                    Err(e) => Err(e.into()),
+                }
+            }
+            _ => {
+                color_eyre::eyre::bail!("Failed to get connection")
+            }
+        }
+    }
+
+    fn get_records(&self) -> Result<Vec<Record>> {
+        match self.conn.lock() {
+            Ok(conn) => {
+                let mut stmt = conn.prepare("SELECT * FROM record")?;
+                let records = stmt
+                    .query_map([], |row| {
+                        let start_time = row.get::<_, DateTime<Utc>>(1)?;
+                        let end_time = row.get::<_, DateTime<Utc>>(4)?;
+                        let diff_add: Option<u32> = row.get(6)?;
+                        let diff_delete: Option<u32> = row.get(7)?;
+                        let diff = diff_add.zip(diff_delete);
+                        Ok(Record {
+                            id: row.get(0)?,
+                            start_time: start_time.with_timezone(&Local),
+                            stdout: row.get(2)?,
+                            stderr: row.get(3)?,
+                            end_time: end_time.with_timezone(&Local),
+                            exit_code: row.get(5)?,
+                            diff,
+                            previous_id: row.get(8)?,
+                        })
+                    })?
+                    .collect::<rusqlite::Result<Vec<Record>>>()?;
+                Ok(records)
+            }
+            _ => {
+                color_eyre::eyre::bail!("Failed to get connection")
+            }
+        }
     }
 
     fn get_runtime_config(&self) -> Result<Option<crate::store::RuntimeConfig>> {
-        match self.conn.lock() { Ok(conn) => {
-            let r = conn.query_row(
-                "SELECT * FROM runtime_config ORDER BY ROWID DESC LIMIT 1",
-                [],
-                |row| {
-                    Ok(crate::store::RuntimeConfig {
-                        interval: row.get(0)?,
-                        command: row.get(1)?,
-                    })
-                },
-            );
+        match self.conn.lock() {
+            Ok(conn) => {
+                let r = conn.query_row(
+                    "SELECT * FROM runtime_config ORDER BY ROWID DESC LIMIT 1",
+                    [],
+                    |row| {
+                        Ok(crate::store::RuntimeConfig {
+                            interval: row.get(0)?,
+                            command: row.get(1)?,
+                        })
+                    },
+                );
 
-            match r {
-                Ok(config) => Ok(Some(config)),
-                Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
-                Err(e) => Err(e.into()),
+                match r {
+                    Ok(config) => Ok(Some(config)),
+                    Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+                    Err(e) => Err(e.into()),
+                }
             }
-        } _ => {
-            color_eyre::eyre::bail!("Failed to get connection")
-        }}
+            _ => {
+                color_eyre::eyre::bail!("Failed to get connection")
+            }
+        }
     }
 
     fn set_runtime_config(&mut self, config: crate::store::RuntimeConfig) -> Result<()> {
-        match self.conn.lock() { Ok(conn) => {
-            conn.execute(
-                "INSERT INTO runtime_config (interval, command) VALUES (?1, ?2)",
-                (config.interval, config.command),
-            )?;
-            Ok(())
-        } _ => {
-            color_eyre::eyre::bail!("Failed to get connection")
-        }}
+        match self.conn.lock() {
+            Ok(conn) => {
+                conn.execute(
+                    "INSERT INTO runtime_config (interval, command) VALUES (?1, ?2)",
+                    (config.interval, config.command),
+                )?;
+                Ok(())
+            }
+            _ => {
+                color_eyre::eyre::bail!("Failed to get connection")
+            }
+        }
     }
 }

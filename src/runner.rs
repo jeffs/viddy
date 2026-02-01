@@ -1,10 +1,10 @@
 use color_eyre::Result;
 use std::{ops::Sub, sync::Arc};
 
-use dissimilar::{diff, Chunk};
+use dissimilar::{Chunk, diff};
 use tokio::{
     process::Command,
-    sync::{mpsc, watch, Mutex},
+    sync::{Mutex, mpsc, watch},
 };
 
 use crate::{

@@ -7,7 +7,7 @@ use ratatui::layout::Rect;
 use tracing::error;
 use tracing_error::ErrorLayer;
 use tracing_subscriber::{
-    self, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, Layer,
+    self, Layer, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt,
 };
 
 const VERSION_MESSAGE: &str = concat!(
@@ -57,7 +57,7 @@ pub fn initialize_panic_handler() -> Result<()> {
 
         #[cfg(not(debug_assertions))]
         {
-            use human_panic::{handle_dump, print_msg, Metadata};
+            use human_panic::{Metadata, handle_dump, print_msg};
             let meta = Metadata::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
                 .authors(env!("CARGO_PKG_AUTHORS").replace(':', ", "))
                 .homepage(env!("CARGO_PKG_HOMEPAGE"));
@@ -120,12 +120,14 @@ pub fn initialize_logging() -> Result<()> {
     let log_path = directory.join(LOG_FILE);
     let log_file = std::fs::File::create(log_path)?;
     // TODO: Audit that the environment access only happens in single-threaded code.
-    unsafe { std::env::set_var(
-        "RUST_LOG",
-        std::env::var("RUST_LOG")
-            .or_else(|_| std::env::var(LOG_ENV.clone()))
-            .unwrap_or_else(|_| format!("{}=info", env!("CARGO_CRATE_NAME"))),
-    ) };
+    unsafe {
+        std::env::set_var(
+            "RUST_LOG",
+            std::env::var("RUST_LOG")
+                .or_else(|_| std::env::var(LOG_ENV.clone()))
+                .unwrap_or_else(|_| format!("{}=info", env!("CARGO_CRATE_NAME"))),
+        )
+    };
     let file_subscriber = tracing_subscriber::fmt::layer()
         .with_file(true)
         .with_line_number(true)
