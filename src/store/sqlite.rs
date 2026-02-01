@@ -58,7 +58,7 @@ impl SQLiteStore {
 
 impl Store for SQLiteStore {
     fn add_record(&mut self, record: Record) -> Result<()> {
-        if let Ok(conn) = self.conn.lock() {
+        match self.conn.lock() { Ok(conn) => {
             conn.execute(
                 "INSERT INTO record (
                 id, start_time, stdout, stderr, end_time, exit_code, diff_add, diff_delete, previous_id
@@ -76,13 +76,13 @@ impl Store for SQLiteStore {
                 ),
             )?;
             Ok(())
-        } else {
+        } _ => {
             color_eyre::eyre::bail!("Failed to get connection")
-        }
+        }}
     }
 
     fn get_record(&self, id: ExecutionId) -> Result<Option<Record>> {
-        if let Ok(conn) = self.conn.lock() {
+        match self.conn.lock() { Ok(conn) => {
             let r = conn.query_row("SELECT * FROM record WHERE id = ?1", [id], |row| {
                 let start_time = row.get::<_, DateTime<Utc>>(1)?;
                 let end_time = row.get::<_, DateTime<Utc>>(4)?;
@@ -106,13 +106,13 @@ impl Store for SQLiteStore {
                 Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
                 Err(e) => Err(e.into()),
             }
-        } else {
+        } _ => {
             color_eyre::eyre::bail!("Failed to get connection")
-        }
+        }}
     }
 
     fn get_latest_id(&self) -> Result<Option<ExecutionId>> {
-        if let Ok(conn) = self.conn.lock() {
+        match self.conn.lock() { Ok(conn) => {
             let r = conn.query_row(
                 "SELECT id FROM record ORDER BY id DESC LIMIT 1",
                 [],
@@ -124,13 +124,13 @@ impl Store for SQLiteStore {
                 Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
                 Err(e) => Err(e.into()),
             }
-        } else {
+        } _ => {
             color_eyre::eyre::bail!("Failed to get connection")
-        }
+        }}
     }
 
     fn get_records(&self) -> Result<Vec<Record>> {
-        if let Ok(conn) = self.conn.lock() {
+        match self.conn.lock() { Ok(conn) => {
             let mut stmt = conn.prepare("SELECT * FROM record")?;
             let records = stmt
                 .query_map([], |row| {
@@ -152,13 +152,13 @@ impl Store for SQLiteStore {
                 })?
                 .collect::<rusqlite::Result<Vec<Record>>>()?;
             Ok(records)
-        } else {
+        } _ => {
             color_eyre::eyre::bail!("Failed to get connection")
-        }
+        }}
     }
 
     fn get_runtime_config(&self) -> Result<Option<crate::store::RuntimeConfig>> {
-        if let Ok(conn) = self.conn.lock() {
+        match self.conn.lock() { Ok(conn) => {
             let r = conn.query_row(
                 "SELECT * FROM runtime_config ORDER BY ROWID DESC LIMIT 1",
                 [],
@@ -175,20 +175,20 @@ impl Store for SQLiteStore {
                 Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
                 Err(e) => Err(e.into()),
             }
-        } else {
+        } _ => {
             color_eyre::eyre::bail!("Failed to get connection")
-        }
+        }}
     }
 
     fn set_runtime_config(&mut self, config: crate::store::RuntimeConfig) -> Result<()> {
-        if let Ok(conn) = self.conn.lock() {
+        match self.conn.lock() { Ok(conn) => {
             conn.execute(
                 "INSERT INTO runtime_config (interval, command) VALUES (?1, ?2)",
                 (config.interval, config.command),
             )?;
             Ok(())
-        } else {
+        } _ => {
             color_eyre::eyre::bail!("Failed to get connection")
-        }
+        }}
     }
 }

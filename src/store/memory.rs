@@ -38,35 +38,35 @@ impl Store for MemoryStore {
     }
 
     fn get_record(&self, id: ExecutionId) -> Result<Option<Record>> {
-        Ok(if let Ok(data) = self.data.read() {
+        Ok(match self.data.read() { Ok(data) => {
             data.records.get(&id).cloned()
-        } else {
+        } _ => {
             None
-        })
+        }})
     }
 
     fn get_latest_id(&self) -> Result<Option<ExecutionId>> {
-        Ok(if let Ok(data) = self.data.read() {
+        Ok(match self.data.read() { Ok(data) => {
             data.latest_id
-        } else {
+        } _ => {
             None
-        })
+        }})
     }
 
     fn get_records(&self) -> Result<Vec<Record>> {
-        Ok(if let Ok(data) = self.data.read() {
+        Ok(match self.data.read() { Ok(data) => {
             data.records.values().cloned().collect()
-        } else {
+        } _ => {
             vec![]
-        })
+        }})
     }
 
     fn get_runtime_config(&self) -> Result<Option<RuntimeConfig>> {
-        Ok(if let Ok(runtime_config) = self.runtime_config.read() {
+        Ok(match self.runtime_config.read() { Ok(runtime_config) => {
             runtime_config.clone()
-        } else {
+        } _ => {
             None
-        })
+        }})
     }
 
     fn set_runtime_config(&mut self, config: RuntimeConfig) -> Result<()> {

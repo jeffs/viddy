@@ -89,13 +89,13 @@ impl<S: Store> App<S> {
             (false, true) => Some(DiffMode::Delete),
             _ => None,
         };
-        let config = if let Ok(config) = OldConfig::new() {
+        let config = match OldConfig::new() { Ok(config) => {
             let mut c = Config::from(config);
             c.defaulting();
             c
-        } else {
+        } _ => {
             Config::new()?
-        };
+        }};
 
         let default_exec = config.general.no_shell.unwrap_or_default();
         let default_shell = config
