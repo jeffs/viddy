@@ -26,7 +26,7 @@ use std::path::PathBuf;
 use chrono::Duration;
 use clap::Parser;
 use cli::Cli;
-use color_eyre::eyre::{eyre, Result};
+use color_eyre::eyre::{Result, eyre};
 use directories::ProjectDirs;
 use store::Store;
 
@@ -64,7 +64,7 @@ async fn tokio_main() -> Result<()> {
         app.run().await?;
     } else {
         let tmp_dir = tempfile::tempdir()?;
-        let tmp_path = tmp_dir.into_path();
+        let tmp_path = tmp_dir.keep();
         let file_path = tmp_path.join("backup.sqlite");
         let store = store::sqlite::SQLiteStore::new(file_path.clone(), true)?;
         let mut app = App::new(args.clone(), store, false)?;
@@ -82,10 +82,11 @@ async fn tokio_main() -> Result<()> {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    match tokio_main().await { Err(e) => {
-        eprintln!("{} error: Something went wrong", env!("CARGO_PKG_NAME"));
-        Err(e)
-    } _ => {
-        Ok(())
-    }}
+    match tokio_main().await {
+        Err(e) => {
+            eprintln!("{} error: Something went wrong", env!("CARGO_PKG_NAME"));
+            Err(e)
+        }
+        _ => Ok(()),
+    }
 }
