@@ -9,7 +9,7 @@ use ratatui::{prelude::Rect, widgets::Block};
 use serde::{Deserialize, Serialize};
 use tokio::{
     runtime,
-    sync::{mpsc, Mutex},
+    sync::{Mutex, mpsc},
 };
 use tracing_subscriber::field::debug;
 
@@ -17,7 +17,7 @@ use crate::{
     action::{self, Action, DiffMode},
     bytes::normalize_stdout,
     cli::Cli,
-    components::{fps::FpsCounter, home::Home, Component},
+    components::{Component, fps::FpsCounter, home::Home},
     config::{Config, RuntimeConfig},
     diff::{diff_and_mark, diff_and_mark_delete},
     mode::Mode,
@@ -89,13 +89,14 @@ impl<S: Store> App<S> {
             (false, true) => Some(DiffMode::Delete),
             _ => None,
         };
-        let config = match OldConfig::new() { Ok(config) => {
-            let mut c = Config::from(config);
-            c.defaulting();
-            c
-        } _ => {
-            Config::new()?
-        }};
+        let config = match OldConfig::new() {
+            Ok(config) => {
+                let mut c = Config::from(config);
+                c.defaulting();
+                c
+            }
+            _ => Config::new()?,
+        };
 
         let default_exec = config.general.no_shell.unwrap_or_default();
         let default_shell = config
