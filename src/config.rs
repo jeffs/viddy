@@ -47,6 +47,8 @@ pub struct General {
     #[serde(default)]
     pub disable_mouse: Option<bool>,
     #[serde(default)]
+    pub disable_auto_save: Option<bool>,
+    #[serde(default)]
     pub min_interval_ms: i64,
     #[serde(default)]
     pub interval_step_ms: i64,
@@ -60,6 +62,7 @@ impl From<OldGeneral> for General {
             shell_options: value.shell_options,
             skip_empty_diffs: value.skip_empty_diffs,
             disable_mouse: value.disable_mouse,
+            disable_auto_save: value.disable_auto_save,
             ..Default::default()
         }
     }
@@ -171,6 +174,9 @@ impl Config {
         }
         if self.general.disable_mouse.is_none() {
             self.general.disable_mouse = default_config.general.disable_mouse;
+        }
+        if self.general.disable_auto_save.is_none() {
+            self.general.disable_auto_save = default_config.general.disable_auto_save;
         }
         if self.general.min_interval_ms == 0 {
             self.general.min_interval_ms = default_config.general.min_interval_ms;

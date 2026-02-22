@@ -20,6 +20,7 @@ pub struct General {
     pub shell_options: Option<String>,
     pub skip_empty_diffs: Option<bool>,
     pub disable_mouse: Option<bool>,
+    pub disable_auto_save: Option<bool>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]

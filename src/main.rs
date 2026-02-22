@@ -50,7 +50,15 @@ async fn tokio_main() -> Result<()> {
         return Err(eyre!("Can not use --load with command"));
     }
 
-    if args.disable_auto_save {
+    let disable_auto_save = args.disable_auto_save || {
+        let cfg = match old_config::OldConfig::new() {
+            Ok(c) => config::Config::from(c),
+            _ => config::Config::new().unwrap_or_default(),
+        };
+        cfg.general.disable_auto_save.unwrap_or(false)
+    };
+
+    if disable_auto_save {
         let store = store::memory::MemoryStore::new();
         let mut app = App::new(args, store, false)?;
         app.run().await?;
