@@ -127,8 +127,8 @@ impl<S: Store> App<S> {
             !cli.is_unfold,
             diff_mode,
             cli.is_bell,
-            cli.is_no_title,
-            cli.is_no_status,
+            cli.is_no_title || config.general.no_title.unwrap_or_default(),
+            cli.is_no_status || config.general.no_status.unwrap_or_default(),
             read_only,
             timemachine_mode,
         );

@@ -49,6 +49,10 @@ pub struct General {
     #[serde(default)]
     pub disable_auto_save: Option<bool>,
     #[serde(default)]
+    pub no_title: Option<bool>,
+    #[serde(default)]
+    pub no_status: Option<bool>,
+    #[serde(default)]
     pub min_interval_ms: i64,
     #[serde(default)]
     pub interval_step_ms: i64,
@@ -63,6 +67,8 @@ impl From<OldGeneral> for General {
             skip_empty_diffs: value.skip_empty_diffs,
             disable_mouse: value.disable_mouse,
             disable_auto_save: value.disable_auto_save,
+            no_title: value.no_title,
+            no_status: value.no_status,
             ..Default::default()
         }
     }
