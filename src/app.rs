@@ -382,8 +382,8 @@ impl<S: Store> App<S> {
                                 );
                             } else {
                                 string = result.plain_text();
-                                if let Some(diff_mode) = self.diff_mode {
-                                    if let Some(previous_id) = record.previous_id {
+                                if let Some(diff_mode) = self.diff_mode
+                                    && let Some(previous_id) = record.previous_id {
                                         let previous_record = self.store.get_record(previous_id)?;
                                         if let Some(previous_record) = previous_record {
                                             let previous_result = termtext::Converter::new(style)
@@ -408,7 +408,6 @@ impl<S: Store> App<S> {
                                             }
                                         }
                                     }
-                                }
                             }
 
                             if let Some(ref search_query) = self.search_query {

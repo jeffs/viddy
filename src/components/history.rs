@@ -61,11 +61,10 @@ impl History {
     }
 
     fn update_latest_history_count(&self) -> Result<()> {
-        if let Some(latest_id) = self.latest_id {
-            if let Some(record) = self.index.get(&latest_id) {
+        if let Some(latest_id) = self.latest_id
+            && let Some(record) = self.index.get(&latest_id) {
                 record.borrow_mut().update_same_count();
             }
-        }
 
         Ok(())
     }
@@ -122,8 +121,8 @@ impl History {
     }
 
     fn select(&mut self, index: Option<usize>) -> Result<()> {
-        if let Some(index) = index {
-            if let Some(history_item) = self.items.get(index) {
+        if let Some(index) = index
+            && let Some(history_item) = self.items.get(index) {
                 let history_item = history_item.borrow();
                 if !history_item.is_running {
                     self.state.select(Some(index));
@@ -133,7 +132,6 @@ impl History {
                     }
                 }
             }
-        }
         Ok(())
     }
 
