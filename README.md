@@ -140,8 +140,14 @@ asdf global viddy latest
 Viddy can be used without any configuration.
 However, if you want to customize the keybindings or default behavior, you can do so.
 
-Install your config file on `$XDG_CONFIG_HOME/viddy.toml`
-On macOS, the path is `~/Library/Application\ Support/viddy.toml`.
+Install your config file as `config.toml` (or `.json5`, `.json`, `.yaml`, `.ini`, checked in that
+order) in viddy's config directory:
+
+- macOS: `~/Library/Application Support/dev.sachaos.viddy/config.toml`
+- Linux: `$XDG_CONFIG_HOME/viddy/config.toml` (falls back to `~/.config/viddy/config.toml`)
+- Windows: `{FOLDERID_RoamingAppData}\sachaos\viddy\config\config.toml`
+
+Override the directory with the `VIDDY_CONFIG` environment variable.
 
 ```toml
 [general]
@@ -150,28 +156,38 @@ shell = "zsh"
 shell_options = ""
 skip_empty_diffs = false
 disable_mouse = true
+disable_auto_save = false
+no_title = false
+no_status = false
+min_interval_ms = 500
+interval_step_ms = 500
 
-[keymap]
-timemachine_go_to_past = "Down"
-timemachine_go_to_more_past = "Shift-Down"
-timemachine_go_to_future = "Up"
-timemachine_go_to_more_future = "Shift-Up"
-timemachine_go_to_now = "Ctrl-Shift-Up"
-timemachine_go_to_oldest = "Ctrl-Shift-Down"
-scroll_left = "h"
-scroll_right = "l"
-scroll_up = "k"
-scroll_down = "j"
-scroll_half_page_up = "Ctrl-u"
-scroll_half_page_down = "Ctrl-d"
-scroll_page_up = "Ctrl-b"
-scroll_page_down = "Ctrl-f"
-scroll_bottom_of_page = "Shift-g"
-scroll_top_of_page = "g g"
+[keybindings.All]
+"<Shift-j>" = "GoToPast"
+"<Shift-f>" = "GoToMorePast"
+"<Shift-k>" = "GoToFuture"
+"<Shift-b>" = "GoToMoreFuture"
+"<Shift-o>" = "GoToOldest"
+"<Shift-n>" = "GoToCurrent"
+"<h>" = "ScrollLeft"
+"<l>" = "ScrollRight"
+"<k>" = "ResultScrollUp"
+"<j>" = "ResultScrollDown"
+"<Ctrl-u>" = "ResultHalfPageUp"
+"<Ctrl-d>" = "ResultHalfPageDown"
+"<Ctrl-b>" = "ResultPageUp"
+"<Ctrl-f>" = "ResultPageDown"
+"<Shift-g>" = "BottomOfPage"
+"<g><g>" = "TopOfPage"
 
-[color]
-background = "white" # Default value is inherit from terminal color.
+[styles.All]
+background = "white" # Default value is inherited from terminal color.
 ```
+
+This replaces the older `viddy.toml` (`[general]`/`[keymap]`/`[color]`) config format. For backward
+compatibility, viddy still checks for that file first — at `~/Library/Application Support/viddy.toml`
+(macOS) or `$XDG_CONFIG_HOME/viddy.toml` — and only reads the format and location above if it's
+absent.
 
 ## What is "viddy" ?
 
