@@ -92,7 +92,7 @@ impl Store for SQLiteStore {
                 Ok(())
             }
             _ => {
-                color_eyre::eyre::bail!("Failed to get connection")
+                color_eyre::eyre::bail!("Failed to get connection");
             }
         }
     }
@@ -125,7 +125,7 @@ impl Store for SQLiteStore {
                 }
             }
             _ => {
-                color_eyre::eyre::bail!("Failed to get connection")
+                color_eyre::eyre::bail!("Failed to get connection");
             }
         }
     }
@@ -146,7 +146,7 @@ impl Store for SQLiteStore {
                 }
             }
             _ => {
-                color_eyre::eyre::bail!("Failed to get connection")
+                color_eyre::eyre::bail!("Failed to get connection");
             }
         }
     }
@@ -177,7 +177,7 @@ impl Store for SQLiteStore {
                 Ok(records)
             }
             _ => {
-                color_eyre::eyre::bail!("Failed to get connection")
+                color_eyre::eyre::bail!("Failed to get connection");
             }
         }
     }
@@ -203,7 +203,7 @@ impl Store for SQLiteStore {
                 }
             }
             _ => {
-                color_eyre::eyre::bail!("Failed to get connection")
+                color_eyre::eyre::bail!("Failed to get connection");
             }
         }
     }
@@ -218,7 +218,7 @@ impl Store for SQLiteStore {
                 Ok(())
             }
             _ => {
-                color_eyre::eyre::bail!("Failed to get connection")
+                color_eyre::eyre::bail!("Failed to get connection");
             }
         }
     }
